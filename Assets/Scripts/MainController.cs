@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,10 +7,8 @@ public class MainController : MonoBehaviour
 {
     private bool isWalking;
     private bool movePressed;
-    private bool forwardPressed;
-    private bool backPressed;
-    private bool leftPressed;
-    private bool rightPressed;
+    private float horizontalPressed;
+    private float verticalPressed;
 
     // Start is called before the first frame update
     void Start()
@@ -21,14 +20,12 @@ public class MainController : MonoBehaviour
     void Update()
     {
         isWalking = gameObject.GetComponent<Animator>().GetBool("isWalking");
-        forwardPressed = Input.GetKey(KeyCode.W);
-        backPressed = Input.GetKey(KeyCode.S);
-        leftPressed = Input.GetKey(KeyCode.A);
-        rightPressed = Input.GetKey(KeyCode.D);
-        movePressed =  forwardPressed || backPressed || rightPressed || leftPressed;
+        horizontalPressed = Input.GetAxis("Horizontal");
+        verticalPressed = Input.GetAxis("Vertical");
+        movePressed = (horizontalPressed != 0) || (verticalPressed != 0);
 
         if (! isWalking && movePressed) {
-            MoveDirection();
+            Debug.Log(transform.rotation.eulerAngles.y);
             gameObject.GetComponent<Animator>().SetBool("isWalking", true);
         }
 
@@ -36,36 +33,105 @@ public class MainController : MonoBehaviour
             gameObject.GetComponent<Animator>().SetBool("isWalking", false);
         }
 
-        
         Move();
+        RotateWithDirection();
     }
 
     private void Move()
     {
         transform.Translate(new Vector3(
-            Time.deltaTime * 2f * Input.GetAxis("Horizontal"),
+            Time.deltaTime * 2f * horizontalPressed,
             0,
-            Time.deltaTime * 2f * Input.GetAxis("Vertical")
+            Time.deltaTime * 2f * verticalPressed
         ), Space.World);
     }
 
-    private void MoveDirection()
+    private void RotateWithDirection()
     {
-        if (forwardPressed) {
-            ChangeRotationY(0);
-        } else if (backPressed) {
-            ChangeRotationY(180);
-        } else if (rightPressed) {
-            ChangeRotationY(90);
-        } else if (leftPressed) {
-            ChangeRotationY(-90);
+        int degree = 0;
+        int direction = 0;
+        float eulerY = transform.rotation.eulerAngles.y;
+        int[] rotation = new int[2] {0, 0};
+
+        if (verticalPressed > 0) {
+            rotation = GetRotationByAxis("up", eulerY);
+        } else if (verticalPressed < 0) {
+            rotation = GetRotationByAxis("down", eulerY);
+        } else if (horizontalPressed > 0) {
+            rotation = GetRotationByAxis("right", eulerY);
+        } else if (horizontalPressed < 0) {
+            rotation = GetRotationByAxis("left", eulerY);
         }
+
+        direction = rotation[0];
+        degree = rotation[1];
+
+        // If current degree reached correct one, stop rotate.
+        if (Math.Round(eulerY) == degree) direction = 0;
+
+        transform.Rotate(new Vector3(
+            0,
+            Time.deltaTime * 150f * direction,
+            0
+        ), Space.World);
     }
 
-    private void ChangeRotationY(float y)
+    private int[] GetRotationByAxis(string axis, float eulerY)
     {
-        var rotation = transform.rotation.eulerAngles;
-        rotation.y = y;
-        transform.rotation = Quaternion.Euler(rotation);
+        int[] rotation = new int[2];
+        int upDirection = 0;
+        int downDirection = 0;
+        int leftDirection = 0;
+        int rightDirection = 0;
+
+        if (InFloatRange(eulerY, 0, 90)) {
+            upDirection = -1;
+            downDirection = 1;
+            leftDirection = -1;
+            rightDirection = 1;
+        } else if (InFloatRange(eulerY, 90, 180)) {
+            upDirection = -1;
+            downDirection = 1;
+            leftDirection = 1;
+            rightDirection = -1;
+        } else if (InFloatRange(eulerY, 180, 270)) {
+            upDirection = 1;
+            downDirection = -1;
+            leftDirection = 1;
+            rightDirection = -1;
+        } else if (InFloatRange(eulerY, 270, 360)) {
+            upDirection = 1;
+            downDirection = -1;
+            leftDirection = -1;
+            rightDirection = 1;
+        }
+
+        if (axis == "up") {
+            rotation[0] = upDirection;
+            rotation[1] = 0;
+        } else if (axis == "down") {
+            rotation[0] = downDirection;
+            rotation[1] = 180;
+        }  else if (axis == "right") {
+            rotation[0] = rightDirection;
+            rotation[1] = 90;
+        }  else if (axis == "left") {
+            rotation[0] = leftDirection;
+            rotation[1] = 270;
+        }
+
+        return rotation;
+    }
+
+    /// <summary>
+    /// Determines whether a float value is in float range.
+    /// </summary>
+    /// <param name="needle"></param>
+    /// <param name="from"></param>
+    /// <param name="to"></param>
+    /// <returns></returns>
+    private bool InFloatRange(float needle, float from, float to)
+    {
+        return needle >= from && needle <= to;
     }
 }
