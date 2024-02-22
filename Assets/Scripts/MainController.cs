@@ -11,9 +11,11 @@ public class MainController : MonoBehaviour
     public float rotateSpeed = 190f;
 
     private bool isWalking;
+    private bool isRunning;
     private bool movePressed;
     private float horizontalPressed;
     private float verticalPressed;
+    private bool runPressed;
 
     // Start is called before the first frame update
     void Start()
@@ -24,20 +26,41 @@ public class MainController : MonoBehaviour
     void Update()
     {
         isWalking = gameObject.GetComponent<Animator>().GetBool("isWalking");
+        isRunning = gameObject.GetComponent<Animator>().GetBool("isRunning");
         horizontalPressed = Input.GetAxis("Horizontal");
         verticalPressed = Input.GetAxis("Vertical");
         movePressed = (horizontalPressed != 0) || (verticalPressed != 0);
+        runPressed = Input.GetKey(KeyCode.LeftShift);
 
+        SwitchMovementState();
+        Move();
+        RotateWithDirection();
+    }
+
+    /// <summary>
+    /// Switch between movement states.
+    /// </summary>
+    private void SwitchMovementState()
+    {
+        // If state is idle and movement is pressed, switch to walking.
         if (! isWalking && movePressed) {
             gameObject.GetComponent<Animator>().SetBool("isWalking", true);
         }
 
+        // If state is walking and release movement, switch to idle.
         if (isWalking && ! movePressed) {
             gameObject.GetComponent<Animator>().SetBool("isWalking", false);
         }
 
-        Move();
-        RotateWithDirection();
+        // If state is walking and press run, switch to running.
+        if (! isRunning && movePressed && runPressed) {
+            gameObject.GetComponent<Animator>().SetBool("isRunning", true);
+        }
+
+        // If state is running and release movement/run, switch to walking
+        if (isRunning && (! movePressed || ! runPressed)) {
+            gameObject.GetComponent<Animator>().SetBool("isRunning", false);
+        }
     }
 
     /// <summary>
