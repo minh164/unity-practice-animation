@@ -1,10 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class MainController : MonoBehaviour
 {
+    public float movingSpeed = 4f;
+    public float rotateSpeed = 190f;
+
     private bool isWalking;
     private bool movePressed;
     private float horizontalPressed;
@@ -12,8 +17,7 @@ public class MainController : MonoBehaviour
 
     // Start is called before the first frame update
     void Start()
-    {
-
+    {    
     }
 
     // Update is called once per frame
@@ -25,7 +29,6 @@ public class MainController : MonoBehaviour
         movePressed = (horizontalPressed != 0) || (verticalPressed != 0);
 
         if (! isWalking && movePressed) {
-            Debug.Log(transform.rotation.eulerAngles.y);
             gameObject.GetComponent<Animator>().SetBool("isWalking", true);
         }
 
@@ -37,15 +40,21 @@ public class MainController : MonoBehaviour
         RotateWithDirection();
     }
 
+    /// <summary>
+    /// Object moving.
+    /// </summary>
     private void Move()
     {
         transform.Translate(new Vector3(
-            Time.deltaTime * 2f * horizontalPressed,
+            Time.deltaTime * movingSpeed * horizontalPressed,
             0,
-            Time.deltaTime * 2f * verticalPressed
+            Time.deltaTime * movingSpeed * verticalPressed
         ), Space.World);
     }
 
+    /// <summary>
+    /// Rotates object by direction when moving.
+    /// </summary>
     private void RotateWithDirection()
     {
         int degree = 0;
@@ -54,36 +63,45 @@ public class MainController : MonoBehaviour
         int[] rotation = new int[2] {0, 0};
 
         if (verticalPressed > 0) {
-            rotation = GetRotationByAxis("up", eulerY);
+            rotation = GetRotationByAxis(MovementAxis.UP, eulerY);
         } else if (verticalPressed < 0) {
-            rotation = GetRotationByAxis("down", eulerY);
+            rotation = GetRotationByAxis(MovementAxis.DOWN, eulerY);
         } else if (horizontalPressed > 0) {
-            rotation = GetRotationByAxis("right", eulerY);
+            rotation = GetRotationByAxis(MovementAxis.RIGHT, eulerY);
         } else if (horizontalPressed < 0) {
-            rotation = GetRotationByAxis("left", eulerY);
+            rotation = GetRotationByAxis(MovementAxis.LEFT, eulerY);
         }
 
         direction = rotation[0];
         degree = rotation[1];
 
-        // If current degree reached correct one, stop rotate.
+        // If current degree reached, stop rotate.
         if (Math.Round(eulerY) == degree) direction = 0;
 
         transform.Rotate(new Vector3(
             0,
-            Time.deltaTime * 150f * direction,
+            Time.deltaTime * rotateSpeed * direction,
             0
         ), Space.World);
     }
 
+    /// <summary>
+    /// Get rotation info (rotate direction, rotate degree) by current axis of object.
+    /// </summary>
+    /// <param name="axis"></param>
+    /// <param name="eulerY"></param>
+    /// <returns></returns>
     private int[] GetRotationByAxis(string axis, float eulerY)
     {
         int[] rotation = new int[2];
+
+        // Rotate directions when they are pressed.
         int upDirection = 0;
         int downDirection = 0;
         int leftDirection = 0;
         int rightDirection = 0;
 
+        // Seperate the circle to some euler parts and define direction base on each part.
         if (InFloatRange(eulerY, 0, 90)) {
             upDirection = -1;
             downDirection = 1;
@@ -106,18 +124,24 @@ public class MainController : MonoBehaviour
             rightDirection = 1;
         }
 
-        if (axis == "up") {
-            rotation[0] = upDirection;
-            rotation[1] = 0;
-        } else if (axis == "down") {
-            rotation[0] = downDirection;
-            rotation[1] = 180;
-        }  else if (axis == "right") {
-            rotation[0] = rightDirection;
-            rotation[1] = 90;
-        }  else if (axis == "left") {
-            rotation[0] = leftDirection;
-            rotation[1] = 270;
+        // Get rotation by pressed axis.
+        switch (axis) {
+            case MovementAxis.UP:
+                rotation[0] = upDirection;
+                rotation[1] = 0;
+                break;
+            case MovementAxis.DOWN:
+                rotation[0] = downDirection;
+                rotation[1] = 180;
+                break;
+            case MovementAxis.RIGHT:
+                rotation[0] = rightDirection;
+                rotation[1] = 90;
+                break;
+            case MovementAxis.LEFT:
+                rotation[0] = leftDirection;
+                rotation[1] = 270;
+                break;
         }
 
         return rotation;

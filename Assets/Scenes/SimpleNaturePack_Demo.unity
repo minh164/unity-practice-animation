@@ -5362,6 +5362,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6a368a26b24804ea2b999d39c9311701, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  movingSpeed: 5
+  rotateSpeed: 260
 --- !u!54 &944651665
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -9780,7 +9782,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 944651661}
-  position: {x: 0.0074518323, y: 6.25, z: -8.68}
 --- !u!81 &2005619989
 AudioListener:
   m_ObjectHideFlags: 0

@@ -5,16 +5,16 @@ using UnityEngine;
 public class FollowPlayer : MonoBehaviour
 {
     public GameObject player;
-    public Vector3 position;
+    private Vector3 initPosition;
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        initPosition = transform.position;
     }
 
     void LateUpdate()
     {
-        transform.position = position + player.transform.position;    
+        transform.position = initPosition + player.transform.position;    
     }
 }
