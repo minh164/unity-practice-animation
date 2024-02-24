@@ -1,11 +1,10 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
+using Helpers;
+using Constants;
+using System.Collections.Generic;
 
-public class MainController : MonoBehaviour
+public class MovementController : MonoBehaviour
 {
     public float movingSpeed = 4f;
     public float rotateSpeed = 190f;
@@ -19,7 +18,7 @@ public class MainController : MonoBehaviour
 
     // Start is called before the first frame update
     void Start()
-    {    
+    {
     }
 
     // Update is called once per frame
@@ -111,59 +110,38 @@ public class MainController : MonoBehaviour
     /// <summary>
     /// Get rotation info (rotate direction, rotate degree) by current axis of object.
     /// </summary>
-    /// <param name="axis"></param>
-    /// <param name="eulerY"></param>
+    /// <param name="axis"><see cref="MovementAxis"/></param>
+    /// <param name="eulerY">Y rotation degree to get direction</param>
     /// <returns></returns>
     private int[] GetRotationByAxis(string axis, float eulerY)
     {
         int[] rotation = new int[2];
 
-        // Rotate directions when they are pressed.
-        int upDirection = 0;
-        int downDirection = 0;
-        int leftDirection = 0;
-        int rightDirection = 0;
+        var rotateDirections = GetRotateDirections(eulerY);
+        var rotateDegrees = GetRotateDegrees(axis);
 
-        // Seperate the circle to some euler parts and define direction base on each part.
-        if (InFloatRange(eulerY, 0, 90)) {
-            upDirection = -1;
-            downDirection = 1;
-            leftDirection = -1;
-            rightDirection = 1;
-        } else if (InFloatRange(eulerY, 90, 180)) {
-            upDirection = -1;
-            downDirection = 1;
-            leftDirection = 1;
-            rightDirection = -1;
-        } else if (InFloatRange(eulerY, 180, 270)) {
-            upDirection = 1;
-            downDirection = -1;
-            leftDirection = 1;
-            rightDirection = -1;
-        } else if (InFloatRange(eulerY, 270, 360)) {
-            upDirection = 1;
-            downDirection = -1;
-            leftDirection = -1;
-            rightDirection = 1;
-        }
-
+        string upAxis = MovementAxis.UP;
+        string downAxis = MovementAxis.DOWN;
+        string rightAxis = MovementAxis.RIGHT;
+        string leftAxis = MovementAxis.LEFT;
+    
         // Get rotation by pressed axis.
         switch (axis) {
             case MovementAxis.UP:
-                rotation[0] = upDirection;
-                rotation[1] = 0;
+                rotation[0] = rotateDirections[upAxis];
+                rotation[1] = rotateDegrees[upAxis];
                 break;
             case MovementAxis.DOWN:
-                rotation[0] = downDirection;
-                rotation[1] = 180;
+                rotation[0] = rotateDirections[downAxis];
+                rotation[1] = rotateDegrees[downAxis];
                 break;
             case MovementAxis.RIGHT:
-                rotation[0] = rightDirection;
-                rotation[1] = 90;
+                rotation[0] = rotateDirections[rightAxis];
+                rotation[1] = rotateDegrees[rightAxis];
                 break;
             case MovementAxis.LEFT:
-                rotation[0] = leftDirection;
-                rotation[1] = 270;
+                rotation[0] = rotateDirections[leftAxis];
+                rotation[1] = rotateDegrees[leftAxis];
                 break;
         }
 
@@ -171,14 +149,53 @@ public class MainController : MonoBehaviour
     }
 
     /// <summary>
-    /// Determines whether a float value is in float range.
+    /// Get rotate direction list bases on current Y rotation of object.
     /// </summary>
-    /// <param name="needle"></param>
-    /// <param name="from"></param>
-    /// <param name="to"></param>
+    /// <param name="eulerY">Y rotation degree to get direction</param>
     /// <returns></returns>
-    private bool InFloatRange(float needle, float from, float to)
+    private Dictionary<string, int> GetRotateDirections(float eulerY)
     {
-        return needle >= from && needle <= to;
+        // Rotate directions when they are pressed.
+        Dictionary<string, int> rotateDirections = new Dictionary<string, int>() {
+            {MovementAxis.UP, 0}, {MovementAxis.DOWN, 0}, {MovementAxis.LEFT, 0}, {MovementAxis.RIGHT, 0},
+        };
+
+        // Seperate the circle to some euler parts and define rotate directions base on each part.
+        if (BaseHelper.InFloatRange(eulerY, 0, 90)) {
+            rotateDirections = new Dictionary<string, int>() {
+                {MovementAxis.UP, -1}, {MovementAxis.DOWN, 1}, {MovementAxis.LEFT, -1}, {MovementAxis.RIGHT, 1},
+            };
+        } else if (BaseHelper.InFloatRange(eulerY, 90, 180)) {
+            rotateDirections = new Dictionary<string, int>() {
+                {MovementAxis.UP, -1}, {MovementAxis.DOWN, 1}, {MovementAxis.LEFT, 1}, {MovementAxis.RIGHT, -1},
+            };
+        } else if (BaseHelper.InFloatRange(eulerY, 180, 270)) {
+            rotateDirections = new Dictionary<string, int>() {
+                {MovementAxis.UP, 1}, {MovementAxis.DOWN, -1}, {MovementAxis.LEFT, 1}, {MovementAxis.RIGHT, -1},
+            };
+        } else if (BaseHelper.InFloatRange(eulerY, 270, 360)) {
+            rotateDirections = new Dictionary<string, int>() {
+                {MovementAxis.UP, 1}, {MovementAxis.DOWN, -1}, {MovementAxis.LEFT, -1}, {MovementAxis.RIGHT, 1},
+            };
+        }
+
+        return rotateDirections;
+    }
+
+    /// <summary>
+    /// Get rotate degree list bases on axis.
+    /// </summary>
+    /// <param name="axis"><see cref="MovementAxis"/></param>
+    /// <returns></returns>
+    private Dictionary<string, int> GetRotateDegrees(string axis)
+    {
+        Dictionary<string, int> rotateDegrees = new Dictionary<string, int>() {
+            {MovementAxis.UP, 0},
+            {MovementAxis.DOWN, 180},
+            {MovementAxis.RIGHT, 90},
+            {MovementAxis.LEFT, 270},
+        };
+
+        return rotateDegrees;
     }
 }
