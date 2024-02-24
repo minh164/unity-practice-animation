@@ -6,9 +6,11 @@ using System.Collections.Generic;
 
 public class MovementController : MonoBehaviour
 {
-    public float movingSpeed = 4f;
+    public float walkSpeed = 5f;
+    public float runSpeed = 8f;
     public float rotateSpeed = 190f;
 
+    private float movingSpeed;
     private bool isWalking;
     private bool isRunning;
     private bool movePressed;
@@ -19,6 +21,7 @@ public class MovementController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        movingSpeed = walkSpeed;
     }
 
     // Update is called once per frame
@@ -53,11 +56,13 @@ public class MovementController : MonoBehaviour
 
         // If state is walking and press run, switch to running.
         if (! isRunning && movePressed && runPressed) {
+            movingSpeed = runSpeed;
             gameObject.GetComponent<Animator>().SetBool("isRunning", true);
         }
 
         // If state is running and release movement/run, switch to walking
         if (isRunning && (! movePressed || ! runPressed)) {
+            movingSpeed = walkSpeed;
             gameObject.GetComponent<Animator>().SetBool("isRunning", false);
         }
     }
