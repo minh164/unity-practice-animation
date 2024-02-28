@@ -9,9 +9,10 @@ namespace Animations
     public class MovementController : MonoBehaviour
     {
         public float walkSpeed = 5f;
-        public float runSpeed = 8f;
+        public float runSpeed = 6f;
         public float rotateSpeed = 190f;
 
+        // Internal.
         private float movingSpeed;
         private bool isWalking;
         private bool isRunning;
@@ -29,44 +30,69 @@ namespace Animations
         // Update is called once per frame
         void Update()
         {
-            isWalking = gameObject.GetComponent<Animator>().GetBool("isWalking");
-            isRunning = gameObject.GetComponent<Animator>().GetBool("isRunning");
-            horizontalPressed = Input.GetAxis("Horizontal");
-            verticalPressed = Input.GetAxis("Vertical");
+            isWalking = gameObject.GetComponent<Animator>().GetBool(AnimationParams.IS_WALKING);
+            isRunning = gameObject.GetComponent<Animator>().GetBool(AnimationParams.IS_RUNNING);
+            horizontalPressed = Input.GetAxis(MovementAxis.HORIZONTAL);
+            verticalPressed = Input.GetAxis(MovementAxis.VERTICAL);
             movePressed = (horizontalPressed != 0) || (verticalPressed != 0);
             runPressed = Input.GetKey(KeyCode.LeftShift);
 
-            SwitchMovementState();
+            TriggerMoveEvents();
             Move();
             RotateWithDirection();
         }
 
         /// <summary>
-        /// Switch between movement states.
+        /// Trigger move events.
         /// </summary>
-        private void SwitchMovementState()
+        private void TriggerMoveEvents()
         {
-            // If state is idle and movement is pressed, switch to walking.
-            if (! isWalking && movePressed) {
-                gameObject.GetComponent<Animator>().SetBool("isWalking", true);
+            if (movePressed) {
+                OnWalking();
             }
 
-            // If state is walking and release movement, switch to idle.
             if (isWalking && ! movePressed) {
-                gameObject.GetComponent<Animator>().SetBool("isWalking", false);
+                OutWalking();
             }
 
-            // If state is walking and press run, switch to running.
-            if (! isRunning && movePressed && runPressed) {
-                movingSpeed = runSpeed;
-                gameObject.GetComponent<Animator>().SetBool("isRunning", true);
+            if (movePressed && runPressed) {
+                OnRunning();
             }
 
-            // If state is running and release movement/run, switch to walking
             if (isRunning && (! movePressed || ! runPressed)) {
-                movingSpeed = walkSpeed;
-                gameObject.GetComponent<Animator>().SetBool("isRunning", false);
+                OutRunning();
             }
+        }
+
+        /// <summary>
+        /// On walking event.
+        /// </summary>
+        private void OnWalking()
+        {
+            if (! isWalking) gameObject.GetComponent<Animator>().SetBool(AnimationParams.IS_WALKING, true);
+        }
+
+        /// <summary>
+        /// Out walking event.
+        /// </summary>
+        private void OutWalking()
+        {
+            gameObject.GetComponent<Animator>().SetBool(AnimationParams.IS_WALKING, false);;
+        }
+
+        /// <summary>
+        /// On running event.
+        /// </summary>
+        private void OnRunning()
+        {
+            if (! isRunning) gameObject.GetComponent<Animator>().SetBool(AnimationParams.IS_RUNNING, true);
+            movingSpeed = runSpeed;
+        }
+
+        private void OutRunning()
+        {
+            movingSpeed = walkSpeed;
+            gameObject.GetComponent<Animator>().SetBool(AnimationParams.IS_RUNNING, false);
         }
 
         /// <summary>

@@ -1235,7 +1235,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4957605393579145644, guid: 4f46098734d87e24490aef9267915ad2, type: 3}
       propertyPath: m_Name
-      value: HumanMale_Character_Free
+      value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 4957605393579145646, guid: 4f46098734d87e24490aef9267915ad2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -5428,7 +5428,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 804aa00aef9234b5bb52826a26394d53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  jumpForce: 40
+  jumpForce: 1
 --- !u!1001 &969187714
 PrefabInstance:
   m_ObjectHideFlags: 0
