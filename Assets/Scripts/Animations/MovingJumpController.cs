@@ -1,11 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
-using Constants;
 using UnityEngine;
 
 namespace Animations
 {
-    public class JumpController : AnimationManager
+    public class MovingJumpController : AnimationManager
     {
         public float jumpForce = 40f;
 
@@ -18,7 +17,7 @@ namespace Animations
         void Start()
         {
             rigid = gameObject.GetComponent<Rigidbody>();
-            // isJumpingHash = Animator.StringToHash("isJumping");
+            isJumpingHash = Animator.StringToHash("isJumping");
         }
 
         // Update is called once per frame
@@ -30,27 +29,26 @@ namespace Animations
         // Update is called once per fixed delta time (0.02).
         void FixedUpdate()
         {
-            isJumping = GetJumpingUpState();
+            isJumping = gameObject.GetComponent<Animator>().GetBool(isJumpingHash);
             jumpPressed = Input.GetButton("Jump");
 
             if (jumpPressed && ! isJumping) {
-                OnJumpingUp();
+                OnJumping();
             }
 
             
             if (! jumpPressed && isJumping) {
-                OnJumpingDown();
+                OutJumping();
             }
         }
 
         /// <summary>
         /// If state is grounded, switch state is jumping.
         /// </summary>
-        private void OnJumpingUp()
+        private void OnJumping()
         {
-            SetGroundedState(false);
-            SetJumpingUpState(true);
             rigid.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            gameObject.GetComponent<Animator>().SetBool(isJumpingHash, true);
         }
 
         /// <summary>
@@ -58,10 +56,9 @@ namespace Animations
         /// NOTICE: Transition in here need to be set HasExitTime, because Jump animation is long,
         /// it need a time to be finished, after that Grounded transition is triggered.
         /// </summary>
-        private void OnJumpingDown()
+        private void OutJumping()
         {
-            SetJumpingDownState(true);
-            SetJumpingUpState(false);
+            gameObject.GetComponent<Animator>().SetBool(isJumpingHash, false);
         }
     }
 }

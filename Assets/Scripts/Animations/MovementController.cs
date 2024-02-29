@@ -6,13 +6,14 @@ using System.Collections.Generic;
 
 namespace Animations
 {
-    public class MovementController : MonoBehaviour
+    public class MovementController : AnimationManager
     {
         public float walkSpeed = 5f;
         public float runSpeed = 6f;
         public float rotateSpeed = 190f;
 
         // Internal.
+        protected int unlockMoving = 1;
         private float movingSpeed;
         private bool isWalking;
         private bool isRunning;
@@ -30,8 +31,8 @@ namespace Animations
         // Update is called once per frame
         void Update()
         {
-            isWalking = gameObject.GetComponent<Animator>().GetBool(AnimationParams.IS_WALKING);
-            isRunning = gameObject.GetComponent<Animator>().GetBool(AnimationParams.IS_RUNNING);
+            isWalking = GetWalkingState();
+            isRunning = GetRunningState();
             horizontalPressed = Input.GetAxis(MovementAxis.HORIZONTAL);
             verticalPressed = Input.GetAxis(MovementAxis.VERTICAL);
             movePressed = (horizontalPressed != 0) || (verticalPressed != 0);
@@ -69,7 +70,9 @@ namespace Animations
         /// </summary>
         private void OnWalking()
         {
-            if (! isWalking) gameObject.GetComponent<Animator>().SetBool(AnimationParams.IS_WALKING, true);
+            if (! isWalking) {
+                SetWalkingState(true);
+            }
         }
 
         /// <summary>
@@ -77,7 +80,7 @@ namespace Animations
         /// </summary>
         private void OutWalking()
         {
-            gameObject.GetComponent<Animator>().SetBool(AnimationParams.IS_WALKING, false);;
+            SetWalkingState(false);
         }
 
         /// <summary>
@@ -85,14 +88,17 @@ namespace Animations
         /// </summary>
         private void OnRunning()
         {
-            if (! isRunning) gameObject.GetComponent<Animator>().SetBool(AnimationParams.IS_RUNNING, true);
+            if (! isRunning) {
+                SetRunningState(true);
+            }
+            
             movingSpeed = runSpeed;
         }
 
         private void OutRunning()
         {
             movingSpeed = walkSpeed;
-            gameObject.GetComponent<Animator>().SetBool(AnimationParams.IS_RUNNING, false);
+            SetRunningState(false);
         }
 
         /// <summary>
@@ -101,9 +107,9 @@ namespace Animations
         private void Move()
         {
             transform.Translate(new Vector3(
-                Time.deltaTime * movingSpeed * horizontalPressed,
+                Time.deltaTime * movingSpeed * horizontalPressed * unlockMoving,
                 0,
-                Time.deltaTime * movingSpeed * verticalPressed
+                Time.deltaTime * movingSpeed * verticalPressed * unlockMoving
             ), Space.World);
         }
 
