@@ -10,15 +10,14 @@ namespace Animations
         public float jumpForce = 40f;
 
         private Rigidbody rigid;
-        private bool isJumping;
-        private int isJumpingHash;
+        private bool isJumpingUp;
+        private bool isJumpingDown;
         private bool jumpPressed;
 
         // Start is called before the first frame update
         void Start()
         {
             rigid = gameObject.GetComponent<Rigidbody>();
-            // isJumpingHash = Animator.StringToHash("isJumping");
         }
 
         // Update is called once per frame
@@ -30,16 +29,21 @@ namespace Animations
         // Update is called once per fixed delta time (0.02).
         void FixedUpdate()
         {
-            isJumping = GetJumpingUpState();
+            isJumpingUp = GetJumpingUpState();
+            isJumpingDown = GetJumpingDownState();
             jumpPressed = Input.GetButton("Jump");
 
-            if (jumpPressed && ! isJumping) {
+            if (jumpPressed && ! isJumpingUp && ! isJumpingDown && IsGrounded()) {
                 OnJumpingUp();
             }
 
             
-            if (! jumpPressed && isJumping) {
+            if (! jumpPressed && isJumpingUp) {
                 OnJumpingDown();
+            }
+
+            if (IsGrounded() && isJumpingDown) {
+                SetJumpingDownState(false);
             }
         }
 
@@ -48,9 +52,10 @@ namespace Animations
         /// </summary>
         private void OnJumpingUp()
         {
-            SetGroundedState(false);
             SetJumpingUpState(true);
-            rigid.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            if (GetJumpingUpState()) {
+                rigid.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
+            }
         }
 
         /// <summary>

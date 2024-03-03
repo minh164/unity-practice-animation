@@ -18,21 +18,16 @@ namespace Animations
         }
 
         /// <summary>
-        /// Get is grounded state.
+        /// Determines whether object is grounded.
         /// </summary>
         /// <returns></returns>
-        protected bool GetGroundedState()
+        protected bool IsGrounded()
         {
-            return gameObject.GetComponent<Animator>().GetBool(AnimationParams.IS_GROUNDED);
-        }
+            return GetComponent<Rigidbody>().velocity.y == 0;
+            // Ray ray = new Ray(transform.position + new Vector3(0,0.1f,0), Vector3.down);
+            // Debug.DrawRay(ray.origin, ray.direction, Color.red, 0.1f);
 
-        /// <summary>
-        /// Set is grounded state.
-        /// </summary>
-        /// <param name="value"></param>
-        protected void SetGroundedState(bool value)
-        {
-            gameObject.GetComponent<Animator>().SetBool(AnimationParams.IS_GROUNDED, value);            
+            // return Physics.Raycast(ray, 0.1f, ~0);
         }
 
         /// <summary>
