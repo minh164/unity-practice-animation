@@ -38,7 +38,7 @@ namespace Animations
             }
 
             
-            if (! jumpPressed && isJumpingUp) {
+            if (isJumpingUp) {
                 OnJumpingDown();
             }
 
